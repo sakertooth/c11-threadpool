@@ -1,12 +1,12 @@
 #pragma once
 #include <stdlib.h>
-#include <stddef.h>
 #include <string.h>
-#include <stdio.h>
+#include <stddef.h>
 
 typedef struct 
 {
     void *data;
+    int write_index;
     size_t size;
     size_t element_size;
     size_t capacity;
@@ -15,45 +15,36 @@ typedef struct
 queue_t* queue_create(size_t capacity, size_t element_size) 
 {
     queue_t *queue = malloc(sizeof(*queue));
-    queue->capacity = capacity > 0 ? capacity : 2;
-    queue->element_size = element_size;
+    queue->data = malloc(capacity * element_size);
+    queue->write_index = 0;
     queue->size = 0;
-    queue->data = malloc(queue->capacity * queue->element_size);
+    queue->element_size = element_size;
+    queue->capacity = capacity;
     return queue;
 }
 
-int queue_enqueue(queue_t *queue, void *item, size_t item_size) 
+int queue_enqueue(queue_t *queue, void *item) 
 {
-    if (queue->element_size != item_size) return -1;
-    memcpy(&((char*)queue->data)[queue->size++ * queue->element_size], item, item_size);
+    if (queue->capacity == 0) return -1;
 
-    if (queue->size == queue->capacity)
-    {
-        queue->capacity *= 2;
-        queue->data = realloc(queue->data, queue->capacity * queue->element_size);
+    while (queue->size == queue->capacity) {}
+    memcpy(&((char*)queue->data)[queue->write_index++ * queue->element_size], item, queue->element_size);
+    ++queue->size;
 
-        if (queue->data == NULL)
-        {
-            fprintf(stderr, "Failure to reallocate (queue)");
-            abort();
-            return -1;
-        }
-    }
+    if (queue->write_index == queue->capacity - 1) queue->write_index = 0;
     return 0;
 }
 
-int queue_dequeue(queue_t *queue, void *dest)
+int queue_dequeue(queue_t *queue, void *dest) 
 {
-    if (queue->size == 0) return -1;
-    
+    if (queue->capacity == 0 || queue->size == 0) return -1;
+
     memcpy(dest, queue->data, queue->element_size);
-    memmove(queue->data, &((char*)queue->data)[queue->element_size], --queue->size);
-    memmove(&((char*)queue->data)[queue->element_size], &((char*)queue->data)[queue->element_size * 2], queue->element_size);
+    memmove(queue->data, &((char*)queue->data)[queue->element_size], --queue->size * queue->element_size);
     return 0;
 }
 
-void queue_free(queue_t *queue)
+void queue_free(queue_t *queue) 
 {
     free(queue->data);
-    free(queue);
 }
