@@ -47,4 +47,5 @@ int queue_dequeue(queue_t *queue, void *dest)
 void queue_free(queue_t *queue) 
 {
     free(queue->data);
+    free(queue);
 }
