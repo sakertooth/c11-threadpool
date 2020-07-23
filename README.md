@@ -2,13 +2,12 @@
 Just a simple threadpool, based on C11 which uses the new threads.h library.
 
 ## queue
-Basic queue with enqueue and dequeue functions.  
-Similar to a vector, the queue's capacity will double everytime its capacity is met by its size.
+A basic fixed size, circular buffer queue with enqueue and dequeue functions.  
 
 | Function  | Description |
 | ------------- | ------------- |
 | _queue_t \*queue_create(size_t capacity, size_t element_size)_  | Creates a queue with the specified capacity and a size for each element. Returns the queue created.  |
-| _int queue_enqueue(queue_t \*queue, void \*item, size_t item_size)_ | Enqueue an item with a specified size. Returns -1 on error, 0 on success. |
+| _int queue_enqueue(queue_t \*queue, void \*item, size_t item_size)_ | Enqueue an item with a specified size and block if the queue is full. Returns -1 on error, 0 on success. |
 | _int queue_dequeue(queue_t \*queue, void \*dest)_ | Dequeue an item. Returns -1 on error, 0 on success. |
 | _void queue_free(queue_t \*queue)_ | Free the queue back to the heap. |
 
