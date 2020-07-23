@@ -48,7 +48,8 @@ static int threadpool_thread(void *arg)
     return 0;
 }
 
-threadpool_t* threadpool_create(size_t worker_count, size_t queuesize) 
+/* Creates a threadpool with the specified number of workers and queuesize. Returns the threadpool created. */
+threadpool_t* threadpool_create(size_t worker_count, size_t queuesize)
 {
     threadpool_t *threadpool = malloc(sizeof(*threadpool));
     threadpool->workqueue = queue_create(queuesize, sizeof(work_t));
@@ -66,6 +67,7 @@ threadpool_t* threadpool_create(size_t worker_count, size_t queuesize)
     return threadpool;
 }
 
+/* Enqueue an action to the threadpool's internal queue. */
 void threadpool_enqueue(threadpool_t *threadpool, void (*fn)(void*), void *arg)
 {
     work_t work = {fn, arg};
@@ -75,6 +77,7 @@ void threadpool_enqueue(threadpool_t *threadpool, void (*fn)(void*), void *arg)
     cnd_signal(&threadpool->cnd);
 }
 
+/* Wait for all threads in the thread pool to finish, and all tasks in the internal queue to be handled. */
 void threadpool_join(threadpool_t *threadpool)
 {   
     mtx_lock(&threadpool->mtx);
@@ -88,6 +91,7 @@ void threadpool_join(threadpool_t *threadpool)
     }
 }
 
+/* Free the threadpool back to the heap. */
 void threadpool_free(threadpool_t *threadpool)
 {
     queue_free(threadpool->workqueue);
