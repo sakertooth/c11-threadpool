@@ -6,15 +6,16 @@ void fn(void *arg)
     printf("hello world\n");
     struct timespec s;
     s.tv_nsec = 0;
-    s.tv_sec = 3;
+    s.tv_sec = 1;
     thrd_sleep(&s, NULL);
 }
 
 int main() 
 {
-    threadpool_t *tp = threadpool_create(4, 256);
+    threadpool_t *tp = threadpool_create(4, 16);
+    if (tp == NULL) return EXIT_FAILURE;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 16; i++)
     {
         threadpool_enqueue(tp, fn, NULL);
     }
